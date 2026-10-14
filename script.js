@@ -216,14 +216,18 @@ function loadChat() {
   });
 }
 
-// 6. CARTAS COM DELETAR CARTA
+// 6. CARTAS COM DELETAR CARTA E FIX DE PDFS DIFERENTES
 letterForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const title = letterTitle.value.trim();
   let url = letterUrl.value.trim();
 
-  if (url.includes("drive.google.com") && url.includes("/view")) {
-    url = url.replace("/view", "/preview");
+  // Converte links do Google Drive para o modo de visualização preview correto
+  if (url.includes("drive.google.com")) {
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      url = `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
   }
 
   await addDoc(collection(db, "letters"), {
@@ -274,9 +278,13 @@ function loadLetters() {
         }
       });
 
+      // ABRE O PDF ESPECÍFICO DESTA CARTA LIMPANDO O ANTERIOR
       card.querySelector(".read-btn").addEventListener("click", () => {
-        pdfViewer.src = data.url;
-        pdfModal.style.display = "flex";
+        pdfViewer.src = "about:blank";
+        setTimeout(() => {
+          pdfViewer.src = data.url;
+          pdfModal.style.display = "flex";
+        }, 50);
       });
 
       card.querySelector(".btn-like").addEventListener("click", async () => {
@@ -366,22 +374,29 @@ btnLoveAction.addEventListener("click", async () => {
 });
 
 function listenToLoveAlerts(isFael) {
-  // SE NÃO FOR O FAEL, INTERROMPE AQUI (KAY NUNCA VERÁ O MODAL DE VITÓRIA)
+  // BLOQUEIO 1: Se o usuário logado não for o Fael, garante que o modal fica escondido e sai da função
   if (!isFael) {
-    faelVictoryModal.style.display = "none";
+    if (faelVictoryModal) faelVictoryModal.style.display = "none";
     return;
   }
 
   const q = query(collection(db, "alerts"));
 
   onSnapshot(q, (snapshot) => {
+    // BLOQUEIO 2: Confirma novamente se o usuário atual ainda é o Fael antes de processar os dados
+    const currentUser = auth.currentUser;
+    if (!currentUser || !currentUser.email.toLowerCase().includes("fael")) {
+      if (faelVictoryModal) faelVictoryModal.style.display = "none";
+      return;
+    }
+
     if (snapshot.empty) return;
 
     let latestKayAlert = null;
 
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
-      // FILTRA APENAS ALERTAS ENVIADOS PELA KAY
+      // Pega apenas alertas enviados pela Kay
       if (data.from && !data.from.toLowerCase().includes("fael")) {
         if (!latestKayAlert || new Date(data.timestamp) > new Date(latestKayAlert.timestamp)) {
           latestKayAlert = { id: docSnap.id, ...data };
@@ -392,7 +407,7 @@ function listenToLoveAlerts(isFael) {
     if (latestKayAlert) {
       const lastSeenId = localStorage.getItem("fael_last_seen_alert_id");
 
-      // EXIBE APENAS SE FOR UM NOVO ALERTA DA KAY AINDA NÃO VISTO PELO FAEL
+      // Abre o modal APENAS se for o Fael e for um novo alerta da Kay
       if (lastSeenId !== latestKayAlert.id) {
         faelVictoryModal.style.display = "flex";
         faelVictoryModal.dataset.currentAlertId = latestKayAlert.id;
@@ -407,9 +422,4 @@ closeVictoryModal.addEventListener("click", () => {
   if (currentId) {
     localStorage.setItem("fael_last_seen_alert_id", currentId);
   }
-});
-
-closePdfModal.addEventListener("click", () => { 
-  pdfModal.style.display = "none"; 
-  pdfViewer.src = ""; 
 });

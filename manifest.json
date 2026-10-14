@@ -1,0 +1,15 @@
+{
+  "name": "LoveKay",
+  "short_name": "LoveKay",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff0f5",
+  "theme_color": "#ff8da1",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2589/2589175.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
