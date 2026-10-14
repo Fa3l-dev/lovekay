@@ -1,0 +1,271 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: #fff0f5;
+  color: #4a4a4a;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.screen {
+  display: none;
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 20px 90px 20px;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* TELA DE CARREGAMENTO */
+#loading-screen {
+  background-color: #ffffff;
+  justify-content: center;
+  text-align: center;
+}
+
+.heart-container { width: 90px; height: 90px; margin: 0 auto; }
+
+.heart-svg {
+  width: 100%; height: 100%; fill: transparent; stroke: #ffb6c1; stroke-width: 2;
+  stroke-dasharray: 100; stroke-dashoffset: 100;
+  animation: drawHeart 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes drawHeart {
+  0% { stroke-dashoffset: 100; fill: transparent; }
+  70% { stroke-dashoffset: 0; fill: transparent; }
+  100% { stroke-dashoffset: 0; fill: #ffb6c1; }
+}
+
+.logo-title { margin-top: 15px; color: #ff8da1; font-weight: 600; letter-spacing: 1px; font-size: 1.8rem; }
+.loading-subtitle { color: #666; font-size: 0.95rem; margin-top: 6px; font-weight: 500; }
+.loading-author { color: #ff8da1; font-size: 0.85rem; font-weight: 600; margin-top: 2px; }
+
+.card {
+  background: #ffffff; padding: 22px 18px; border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(255, 182, 193, 0.25); width: 100%; margin-bottom: 20px;
+}
+
+.login-card { margin-top: auto; margin-bottom: auto; }
+.login-card h2 { color: #ff8da1; margin-bottom: 5px; }
+.login-card p { font-size: 0.9rem; color: #888; margin-bottom: 20px; }
+
+form { display: flex; flex-direction: column; gap: 12px; }
+
+input {
+  width: 100%; padding: 12px 15px; border: 1.5px solid #ffe4e1;
+  border-radius: 12px; outline: none; transition: 0.3s;
+}
+
+input:focus { border-color: #ffb6c1; }
+
+.btn-primary {
+  background-color: #ff8da1; color: white; border: none; padding: 12px;
+  border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s;
+}
+
+.btn-primary:hover { background-color: #ff758f; }
+
+.btn-secondary {
+  background: transparent; border: 1px solid #ff8da1; color: #ff8da1;
+  padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: 600;
+}
+
+.error-msg { color: #e63946; font-size: 0.85rem; margin-top: 10px; }
+
+.app-header {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: 15px 0; border-bottom: 1px solid #ffe4e1; margin-bottom: 20px;
+}
+
+.app-header h2 { color: #ff8da1; }
+
+.main-content { width: 100%; }
+
+.tab-content { display: none; width: 100%; }
+.tab-content.active-tab { display: block; }
+
+/* CARTAS */
+.letters-section h3 { color: #ff8da1; margin-bottom: 15px; font-size: 1.1rem; }
+.letters-list { display: flex; flex-direction: column; gap: 18px; }
+
+.letter-card-detailed {
+  background: #ffffff; border-radius: 18px; padding: 18px;
+  box-shadow: 0 6px 16px rgba(255, 182, 193, 0.2); border: 1px solid #fff0f5;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.letter-header { display: flex; justify-content: space-between; align-items: center; }
+.letter-title { font-weight: 600; color: #333; font-size: 1.05rem; }
+.letter-sender { font-size: 0.8rem; color: #ff8da1; font-weight: 600; }
+
+.letter-actions {
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid #ffe4e1; padding-top: 10px;
+}
+
+.btn-like { background: none; border: none; color: #ff758f; cursor: pointer; font-size: 0.95rem; font-weight: 600; }
+
+.comments-container {
+  background: #fff8f9; padding: 10px; border-radius: 12px;
+  display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;
+}
+
+.comment-item { font-size: 0.85rem; color: #555; line-height: 1.3; }
+.comment-author { font-weight: 600; color: #ff8da1; }
+
+.comment-form { display: flex; gap: 8px; }
+.comment-input { flex: 1; padding: 8px 12px; border-radius: 20px; border: 1px solid #ffe4e1; font-size: 0.85rem; }
+.btn-comment-send { background: #ff8da1; color: white; border: none; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+
+/* CHAT ESTILO WHATSAPP */
+.chat-card {
+  display: flex;
+  flex-direction: column;
+  height: 65vh;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #fff8f9;
+  border-radius: 15px;
+  margin-bottom: 10px;
+}
+
+.chat-bubble {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  word-break: break-word;
+}
+
+/* MINHAS MENSAGENS (DIREITA) */
+.chat-bubble.mine {
+  align-self: flex-end;
+  background: #ff8da1;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+/* MENSAGENS DA OUTRA PESSOA (ESQUERDA) */
+.chat-bubble.other {
+  align-self: flex-start;
+  background: #ffffff;
+  color: #444;
+  border: 1px solid #ffe4e1;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-author {
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.chat-bubble.mine .chat-author {
+  color: #fff0f5;
+  text-align: right;
+}
+
+.chat-bubble.other .chat-author {
+  color: #ff8da1;
+}
+
+.emoji-bar { display: flex; gap: 10px; padding: 6px 4px; overflow-x: auto; margin-bottom: 5px; }
+.emoji-btn { font-size: 1.3rem; cursor: pointer; transition: transform 0.1s; }
+.emoji-btn:active { transform: scale(1.2); }
+
+/* GALERIA DE FOTOS */
+.photos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 10px; }
+.photo-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(255, 182, 193, 0.2); border: 1px solid #ffe4e1; }
+.photo-card img { width: 100%; height: 140px; object-fit: cover; display: block; }
+.photo-card p { padding: 10px; font-size: 0.85rem; text-align: center; color: #444; font-weight: 500; }
+
+/* ABA EU TE AMO */
+.love-card { text-align: center; padding: 30px 15px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.love-subtitle-top { font-size: 0.9rem; color: #666; line-height: 1.4; }
+.btn-love-giant {
+  background: linear-gradient(135deg, #ff8da1, #ff6b8b); color: white; border: none;
+  padding: 16px 36px; border-radius: 40px; font-size: 1.2rem; font-weight: 600;
+  cursor: pointer; box-shadow: 0 8px 20px rgba(255, 107, 139, 0.4);
+}
+.love-subtitle-bottom { font-size: 0.8rem; color: #888; font-style: italic; }
+
+.kay-response-box {
+  background: #ffe4e1; color: #ff477e; padding: 15px; border-radius: 15px;
+  font-weight: 600; font-size: 0.95rem; line-height: 1.4; margin-top: 10px;
+}
+
+/* MENU DE NAVEGAÇÃO INFERIOR CENTRALIZADO */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  padding: 12px 0;
+  box-shadow: 0 -4px 15px rgba(255, 182, 193, 0.25);
+  z-index: 99;
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 0.75rem;
+  gap: 3px;
+  transition: 0.2s;
+}
+
+.nav-item .nav-icon { font-size: 1.3rem; }
+.nav-item.active { color: #ff8da1; font-weight: 600; transform: scale(1.05); }
+
+/* MODAIS */
+.modal {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center; z-index: 1000;
+}
+
+.modal-content { background: white; width: 90%; height: 80%; border-radius: 15px; position: relative; overflow: hidden; }
+
+.victory-content {
+  height: auto; padding: 30px 20px; text-align: center; border-radius: 20px;
+  background: #fff0f5; border: 2px solid #ff8da1; max-width: 400px;
+}
+
+.victory-content h2 { color: #ff477e; font-size: 1.3rem; margin-bottom: 12px; }
+.victory-text { color: #333; font-weight: 600; font-size: 1.05rem; line-height: 1.5; }
+
+.close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #333; z-index: 1010; }
+#pdf-viewer { width: 100%; height: 100%; border: none; }

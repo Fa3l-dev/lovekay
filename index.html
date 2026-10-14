@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoveKay</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- TELA DE CARREGAMENTO (5 SEGUNDOS) -->
+  <div id="loading-screen" class="screen active">
+    <div class="heart-container">
+      <svg class="heart-svg" viewBox="0 0 32 32">
+        <path d="M16 28.5C15.5 28.5 1 19.5 1 10.5C1 5.8 4.8 2 9.5 2C12.3 2 14.8 3.4 16 5.5C17.2 3.4 19.7 2 22.5 2C27.2 2 31 5.8 31 10.5C31 19.5 16.5 28.5 16 28.5Z" />
+      </svg>
+    </div>
+    <h1 class="logo-title">LoveKay</h1>
+    <p class="loading-subtitle">App criado para a Kay</p>
+    <p class="loading-author">By Fael</p>
+  </div>
+
+  <!-- TELA DE LOGIN -->
+  <div id="login-screen" class="screen">
+    <div class="card login-card">
+      <h2>Nosso Espaço 💕</h2>
+      <p>Acesso exclusivo para Fael e Kay</p>
+      <form id="login-form">
+        <input type="email" id="login-email" placeholder="E-mail" required />
+        <input type="password" id="login-password" placeholder="Senha" required />
+        <button type="submit" class="btn-primary">Entrar</button>
+      </form>
+      <p id="login-error" class="error-msg"></p>
+    </div>
+  </div>
+
+  <!-- PAINEL PRINCIPAL DO APP -->
+  <div id="app-screen" class="screen">
+    <header class="app-header">
+      <h2>LoveKay</h2>
+      <div class="user-info">
+        <span id="user-display-name"></span>
+        <button id="btn-logout" class="btn-secondary">Sair</button>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <!-- ABA 1: CARTAS -->
+      <div id="tab-letters" class="tab-content active-tab">
+        <section id="fael-upload-section" class="card write-card">
+          <h3>Adicionar Carta em PDF 📄</h3>
+          <form id="letter-form">
+            <input type="text" id="letter-title" placeholder="Título da Carta (ex: Carta #1)" required />
+            <input type="url" id="letter-url" placeholder="Link do PDF (Google Drive / Canva)" required />
+            <button type="submit" id="btn-send-letter" class="btn-primary">Adicionar Carta ❤️</button>
+          </form>
+        </section>
+
+        <section class="letters-section">
+          <h3>Nossas Cartas 💌</h3>
+          <div id="letters-list" class="letters-list">
+            <p class="placeholder-text">Carregando cartas...</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ABA 2: CHAT DO CASAL -->
+      <div id="tab-chat" class="tab-content">
+        <div class="card chat-card">
+          <h3>Nosso Chat 💬</h3>
+          <div id="chat-messages" class="chat-messages">
+            <p class="placeholder-text">Nenhuma mensagem ainda...</p>
+          </div>
+          
+          <div class="emoji-bar">
+            <span class="emoji-btn">❤️</span>
+            <span class="emoji-btn">💕</span>
+            <span class="emoji-btn">🥰</span>
+            <span class="emoji-btn">😭</span>
+            <span class="emoji-btn">✨</span>
+            <span class="emoji-btn">🌌</span>
+            <span class="emoji-btn">💖</span>
+          </div>
+
+          <form id="chat-form" class="chat-form">
+            <input type="text" id="chat-input" placeholder="Digite sua mensagem..." required />
+            <button type="submit" class="btn-primary">Enviar</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ABA 3: ÁLBUM DE FOTOS -->
+      <div id="tab-photos" class="tab-content">
+        <section class="card write-card">
+          <h3>Adicionar Foto do Casal 📷</h3>
+          <form id="photo-form">
+            <input type="text" id="photo-title" placeholder="Legenda da Foto" required />
+            <input type="url" id="photo-url" placeholder="Link da Imagem (Imgur, Drive, Pinterest)" required />
+            <button type="submit" class="btn-primary">Salvar Foto ❤️</button>
+          </form>
+        </section>
+
+        <section class="photos-section">
+          <h3>Nossos Momentos 🖼️</h3>
+          <div id="photos-list" class="photos-grid">
+            <p class="placeholder-text">Carregando fotos...</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ABA 4: EU TE AMO (EXCLUSIVO KAY) -->
+      <div id="tab-love" class="tab-content">
+        <div class="card love-card">
+          <p class="love-subtitle-top">
+            Ao apertar esse botão você confirmará que sente algo pelo Fael (ele receberá)
+          </p>
+          
+          <button id="btn-love-action" class="btn-love-giant">
+            <span class="heart-icon">❤️</span> Eu te amo!
+          </button>
+
+          <p class="love-subtitle-bottom">
+            um botão pequeno, porém com um significado maior que um universo 🌌
+          </p>
+
+          <div id="kay-love-response" class="kay-response-box" style="display: none;">
+            FICO FELIZ DEMAIS KAY, EU TE AMO MUITO, QUANDO EU ABRIR O APP VOU TER UMA SURPRESA 💕😭
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- MENU INFERIOR CENTRALIZADO -->
+    <nav class="bottom-nav">
+      <button id="nav-btn-letters" class="nav-item active">
+        <span class="nav-icon">💌</span>
+        <span class="nav-label">Cartas</span>
+      </button>
+      <button id="nav-btn-chat" class="nav-item">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">Chat</span>
+      </button>
+      <button id="nav-btn-photos" class="nav-item">
+        <span class="nav-icon">📷</span>
+        <span class="nav-label">Álbum</span>
+      </button>
+      <button id="nav-btn-love" class="nav-item" style="display: none;">
+        <span class="nav-icon">💖</span>
+        <span class="nav-label">Eu te amo!</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- POPUP SURPRESA DO FAEL -->
+  <div id="fael-victory-modal" class="modal">
+    <div class="modal-content victory-content">
+      <span id="close-victory-modal" class="close-btn">&times;</span>
+      <h2>VOCÊ CONSEGUIU GAROTO! 😭🤍</h2>
+      <p class="victory-text">A 10/10 TE AMA, A KAY TE AMA, PARABÉNS MANO😭🤍</p>
+    </div>
+  </div>
+
+  <!-- MODAL DE PDF -->
+  <div id="pdf-modal" class="modal">
+    <div class="modal-content">
+      <span id="close-pdf-modal" class="close-btn">&times;</span>
+      <iframe id="pdf-viewer" src=""></iframe>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
