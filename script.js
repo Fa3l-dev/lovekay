@@ -76,6 +76,35 @@ const pdfModal = document.getElementById("pdf-modal");
 const pdfViewer = document.getElementById("pdf-viewer");
 const closePdfModal = document.getElementById("close-pdf-modal");
 
+let isFirstChatLoad = true; // Impede disparar notificações de mensagens antigas ao abrir o app
+
+// FORMATADORES DE DATA E HORA
+function formatTimeOnly(isoString) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+function formatDateTime(isoString) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${day}/${month}/${year} às ${hours}:${minutes}`;
+}
+
+// PERMISSÃO DE NOTIFICAÇÕES
+function requestNotificationPermission() {
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+}
+
 // 1. CARREGAMENTO E VERIFICAÇÃO DE LOGIN
 setTimeout(() => {
   loadingScreen.classList.remove("active");
@@ -89,17 +118,19 @@ function checkAuthState() {
       const isFael = user.email.toLowerCase().includes("fael");
       userDisplayName.textContent = isFael ? "Fael ❤️" : "Kay 💕";
 
-      // RESETA AS ABAS PARA A PRIMEIRA (CARTAS) AO LOGAR
+      // Pede permissão para notificações ao entrar
+      requestNotificationPermission();
+
       resetTabs();
       navBtnLetters.classList.add("active");
       tabLetters.classList.add("active-tab");
 
       if (isFael) {
         faelUploadSection.style.display = "block";
-        navBtnLove.style.display = "none"; // ESCONDE TOTALMENTE DA TELA DO FAEL
+        navBtnLove.style.display = "none";
       } else {
         faelUploadSection.style.display = "none";
-        navBtnLove.style.display = "flex"; // APENAS PARA A KAY
+        navBtnLove.style.display = "flex";
       }
 
       loadLetters();
@@ -159,7 +190,7 @@ document.querySelectorAll(".emoji-btn").forEach(btn => {
   });
 });
 
-// 5. CHAT COM DELETAR MENSAGENS
+// 5. CHAT COM VISTO, DELETAR E NOTIFICAÇÕES NATIVAS
 chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = chatInput.value.trim();
@@ -172,7 +203,8 @@ chatForm.addEventListener("submit", async (e) => {
     await addDoc(collection(db, "chats"), {
       author,
       text,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      seen: false
     });
     chatInput.value = "";
   } catch (err) {
@@ -185,22 +217,62 @@ function loadChat() {
   onSnapshot(q, (snapshot) => {
     chatMessages.innerHTML = "";
     let docs = [];
-    snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
-    docs.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
     const isFael = auth.currentUser.email.toLowerCase().includes("fael");
     const myName = isFael ? "Fael ❤️" : "Kay 💕";
+
+    // Dispara a notificação se houver novas mensagens do outro usuário
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "added" && !isFirstChatLoad) {
+        const newMsg = change.doc.data();
+        if (newMsg.author !== myName && "Notification" in window && Notification.permission === "granted") {
+          if (document.hidden || !document.hasFocus()) {
+            new Notification(`LoveKay 💕`, {
+              body: `${newMsg.author}: ${newMsg.text}`,
+              icon: "https://cdn-icons-png.flaticon.com/512/2589/2589175.png"
+            });
+          }
+        }
+      }
+    });
+
+    isFirstChatLoad = false;
+
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      docs.push({ id: docSnap.id, ...data });
+
+      if (data.author !== myName && !data.seen) {
+        updateDoc(doc(db, "chats", docSnap.id), { seen: true });
+      }
+    });
+
+    docs.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
     docs.forEach(data => {
       const isMine = data.author === myName;
       const div = document.createElement("div");
       div.className = `chat-bubble ${isMine ? 'mine' : 'other'}`;
+
+      const timeStr = formatTimeOnly(data.createdAt);
+      
+      let checkIcon = "";
+      if (isMine) {
+        checkIcon = data.seen 
+          ? `<span style="font-size:0.75rem; color:#00d2ff; margin-left:3px; font-weight:bold;">✓✓</span>` 
+          : `<span style="font-size:0.75rem; opacity:0.7; margin-left:3px; font-weight:bold;">✓</span>`;
+      }
+
       div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div style="display:flex; justify-between; align-items:center; gap:8px;">
           <span class="chat-author">${data.author}</span>
           <button class="delete-chat-btn" style="background:none; border:none; cursor:pointer; font-size:0.75rem; opacity:0.7;">🗑️</button>
         </div>
         <div>${data.text}</div>
+        <div style="font-size:0.65rem; opacity:0.8; text-align:right; margin-top:2px; display:flex; justify-content:flex-end; align-items:center;">
+          <span>${timeStr}</span>
+          ${checkIcon}
+        </div>
       `;
 
       div.querySelector(".delete-chat-btn").addEventListener("click", async () => {
@@ -216,13 +288,12 @@ function loadChat() {
   });
 }
 
-// 6. CARTAS COM DELETAR CARTA E FIX DE PDFS DIFERENTES
+// 6. CARTAS COM DATA/HORA, DELETAR CARTA E FIX DE PDFS
 letterForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const title = letterTitle.value.trim();
   let url = letterUrl.value.trim();
 
-  // Converte links do Google Drive para o modo de visualização preview correto
   if (url.includes("drive.google.com")) {
     const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
     if (match && match[1]) {
@@ -249,6 +320,8 @@ function loadLetters() {
       const card = document.createElement("div");
       card.className = "letter-card-detailed";
 
+      const dateStr = formatDateTime(data.createdAt);
+
       const commentsHtml = (data.comments || []).map(c => `
         <div class="comment-item"><span class="comment-author">${c.author}:</span> ${c.text}</div>
       `).join("");
@@ -261,6 +334,7 @@ function loadLetters() {
             <button class="delete-letter-btn" style="background:none; border:none; cursor:pointer; font-size:0.9rem; margin-left:6px;">🗑️</button>
           </div>
         </div>
+        ${dateStr ? `<div style="font-size:0.7rem; color:#aaa; margin-top:-6px;">Enviado em: ${dateStr}</div>` : ''}
         <div class="letter-actions">
           <button class="btn-like">❤️ ${data.likes || 0} Curtidas</button>
           <button class="btn-secondary read-btn">Ler PDF</button>
@@ -278,7 +352,6 @@ function loadLetters() {
         }
       });
 
-      // ABRE O PDF ESPECÍFICO DESTA CARTA LIMPANDO O ANTERIOR
       card.querySelector(".read-btn").addEventListener("click", () => {
         pdfViewer.src = "about:blank";
         setTimeout(() => {
@@ -374,7 +447,6 @@ btnLoveAction.addEventListener("click", async () => {
 });
 
 function listenToLoveAlerts(isFael) {
-  // BLOQUEIO 1: Se o usuário logado não for o Fael, garante que o modal fica escondido e sai da função
   if (!isFael) {
     if (faelVictoryModal) faelVictoryModal.style.display = "none";
     return;
@@ -383,7 +455,6 @@ function listenToLoveAlerts(isFael) {
   const q = query(collection(db, "alerts"));
 
   onSnapshot(q, (snapshot) => {
-    // BLOQUEIO 2: Confirma novamente se o usuário atual ainda é o Fael antes de processar os dados
     const currentUser = auth.currentUser;
     if (!currentUser || !currentUser.email.toLowerCase().includes("fael")) {
       if (faelVictoryModal) faelVictoryModal.style.display = "none";
@@ -396,7 +467,6 @@ function listenToLoveAlerts(isFael) {
 
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
-      // Pega apenas alertas enviados pela Kay
       if (data.from && !data.from.toLowerCase().includes("fael")) {
         if (!latestKayAlert || new Date(data.timestamp) > new Date(latestKayAlert.timestamp)) {
           latestKayAlert = { id: docSnap.id, ...data };
@@ -407,7 +477,6 @@ function listenToLoveAlerts(isFael) {
     if (latestKayAlert) {
       const lastSeenId = localStorage.getItem("fael_last_seen_alert_id");
 
-      // Abre o modal APENAS se for o Fael e for um novo alerta da Kay
       if (lastSeenId !== latestKayAlert.id) {
         faelVictoryModal.style.display = "flex";
         faelVictoryModal.dataset.currentAlertId = latestKayAlert.id;
@@ -422,4 +491,9 @@ closeVictoryModal.addEventListener("click", () => {
   if (currentId) {
     localStorage.setItem("fael_last_seen_alert_id", currentId);
   }
+});
+
+closePdfModal.addEventListener("click", () => {
+  pdfModal.style.display = "none";
+  pdfViewer.src = "about:blank";
 });
