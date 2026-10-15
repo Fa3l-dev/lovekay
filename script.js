@@ -58,13 +58,24 @@ const photosList = document.getElementById("photos-list");
 
 const navBtnLetters = document.getElementById("nav-btn-letters");
 const navBtnChat = document.getElementById("nav-btn-chat");
+const navBtnTimer = document.getElementById("nav-btn-timer");
+const navBtnConfessional = document.getElementById("nav-btn-confessional");
 const navBtnPhotos = document.getElementById("nav-btn-photos");
+const navBtnHistory = document.getElementById("nav-btn-history");
 const navBtnLove = document.getElementById("nav-btn-love");
 
 const tabLetters = document.getElementById("tab-letters");
 const tabChat = document.getElementById("tab-chat");
+const tabTimer = document.getElementById("tab-timer");
+const tabConfessional = document.getElementById("tab-confessional");
 const tabPhotos = document.getElementById("tab-photos");
+const tabHistory = document.getElementById("tab-history");
 const tabLove = document.getElementById("tab-love");
+
+const confessionalForm = document.getElementById("confessional-form");
+const confessionalInput = document.getElementById("confessional-input");
+const confessionalList = document.getElementById("confessional-list");
+const historyTimeline = document.getElementById("history-timeline");
 
 const btnLoveAction = document.getElementById("btn-love-action");
 const kayLoveResponse = document.getElementById("kay-love-response");
@@ -76,7 +87,11 @@ const pdfModal = document.getElementById("pdf-modal");
 const pdfViewer = document.getElementById("pdf-viewer");
 const closePdfModal = document.getElementById("close-pdf-modal");
 
-let isFirstChatLoad = true; // Impede disparar notificações de mensagens antigas ao abrir o app
+let isFirstChatLoad = true;
+let timerInterval = null;
+
+// DATA INICIAL DO CRONÔMETRO: 19 DE FEVEREIRO DE 2025
+const startDate = new Date("2025-02-19T00:00:00").getTime();
 
 // FORMATADORES DE DATA E HORA
 function formatTimeOnly(isoString) {
@@ -118,7 +133,6 @@ function checkAuthState() {
       const isFael = user.email.toLowerCase().includes("fael");
       userDisplayName.textContent = isFael ? "Fael ❤️" : "Kay 💕";
 
-      // Pede permissão para notificações ao entrar
       requestNotificationPermission();
 
       resetTabs();
@@ -127,14 +141,15 @@ function checkAuthState() {
 
       if (isFael) {
         faelUploadSection.style.display = "block";
-        navBtnLove.style.display = "none";
+        navBtnLove.style.setProperty("display", "none", "important");
       } else {
         faelUploadSection.style.display = "none";
-        navBtnLove.style.display = "flex";
+        navBtnLove.style.setProperty("display", "flex", "important");
       }
 
       loadLetters();
       loadChat();
+      loadConfessional();
       loadPhotos();
       listenToLoveAlerts(isFael);
     } else {
@@ -166,20 +181,33 @@ loginForm.addEventListener("submit", async (e) => {
 
 btnLogout.addEventListener("click", () => {
   resetTabs();
-  navBtnLove.style.display = "none";
+  navBtnLove.style.setProperty("display", "none", "important");
+  navBtnHistory.style.setProperty("display", "none", "important");
   kayLoveResponse.style.display = "none";
   signOut(auth);
 });
 
-// 3. TROCA DE ABAS
+// 3. TROCA DE ABAS COM ATUALIZAÇÃO DO STATUS DE VISTO DO CHAT
 function resetTabs() {
-  [navBtnLetters, navBtnChat, navBtnPhotos, navBtnLove].forEach(b => b.classList.remove("active"));
-  [tabLetters, tabChat, tabPhotos, tabLove].forEach(t => t.classList.remove("active-tab"));
+  [navBtnLetters, navBtnChat, navBtnTimer, navBtnConfessional, navBtnPhotos, navBtnHistory, navBtnLove].forEach(b => {
+    if (b) b.classList.remove("active");
+  });
+  [tabLetters, tabChat, tabTimer, tabConfessional, tabPhotos, tabHistory, tabLove].forEach(t => {
+    if (t) t.classList.remove("active-tab");
+  });
 }
 
 navBtnLetters.addEventListener("click", () => { resetTabs(); navBtnLetters.classList.add("active"); tabLetters.classList.add("active-tab"); });
-navBtnChat.addEventListener("click", () => { resetTabs(); navBtnChat.classList.add("active"); tabChat.classList.add("active-tab"); });
+navBtnChat.addEventListener("click", () => { 
+  resetTabs(); 
+  navBtnChat.classList.add("active"); 
+  tabChat.classList.add("active-tab"); 
+  loadChat(); // Força recarregamento ao entrar no chat para marcar mensagens recebidas como vistas
+});
+navBtnTimer.addEventListener("click", () => { resetTabs(); navBtnTimer.classList.add("active"); tabTimer.classList.add("active-tab"); });
+navBtnConfessional.addEventListener("click", () => { resetTabs(); navBtnConfessional.classList.add("active"); tabConfessional.classList.add("active-tab"); });
 navBtnPhotos.addEventListener("click", () => { resetTabs(); navBtnPhotos.classList.add("active"); tabPhotos.classList.add("active-tab"); });
+navBtnHistory.addEventListener("click", () => { resetTabs(); navBtnHistory.classList.add("active"); tabHistory.classList.add("active-tab"); });
 navBtnLove.addEventListener("click", () => { resetTabs(); navBtnLove.classList.add("active"); tabLove.classList.add("active-tab"); });
 
 // 4. BARRINHA DE EMOJIS RÁPIDOS
@@ -190,7 +218,117 @@ document.querySelectorAll(".emoji-btn").forEach(btn => {
   });
 });
 
-// 5. CHAT COM VISTO, DELETAR E NOTIFICAÇÕES NATIVAS
+// 5. CRONÔMETRO QUE PÁRA NO "EU TE AMO"
+function startLoveTimer(endTime) {
+  if (timerInterval) clearInterval(timerInterval);
+
+  function updateDisplay() {
+    const now = endTime ? new Date(endTime).getTime() : new Date().getTime();
+    const diff = Math.max(0, now - startDate);
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    document.getElementById("timer-days").textContent = days;
+    document.getElementById("timer-hours").textContent = String(hours).padStart(2, "0");
+    document.getElementById("timer-minutes").textContent = String(minutes).padStart(2, "0");
+    document.getElementById("timer-seconds").textContent = String(seconds).padStart(2, "0");
+
+    if (endTime) {
+      document.getElementById("timer-status-text").textContent = "🔒 O tempo foi eternizado quando a Kay disse 'Eu te amo!' ❤️";
+    } else {
+      document.getElementById("timer-status-text").textContent = "O tempo continua contando... ⏳";
+    }
+  }
+
+  updateDisplay();
+  if (!endTime) {
+    timerInterval = setInterval(updateDisplay, 1000);
+  }
+}
+
+// 6. CONFESSIONÁRIO PRIVADO (RESTRITO POR EMAIL)
+confessionalForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = confessionalInput.value.trim();
+  if (!text) return;
+
+  const userEmail = auth.currentUser.email.toLowerCase();
+  const isFael = userEmail.includes("fael");
+  const author = isFael ? "Fael ❤️" : "Kay 💕";
+
+  try {
+    await addDoc(collection(db, "confessionals"), {
+      text,
+      owner: userEmail,
+      author,
+      createdAt: new Date().toISOString()
+    });
+    confessionalInput.value = "";
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+function loadConfessional() {
+  const q = query(collection(db, "confessionals"));
+  onSnapshot(q, (snapshot) => {
+    confessionalList.innerHTML = "";
+    historyTimeline.innerHTML = "";
+    
+    const currentUserEmail = auth.currentUser.email.toLowerCase();
+    let myNotes = [];
+    let allNotes = [];
+
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      allNotes.push({ id: docSnap.id, ...data });
+
+      if (data.owner === currentUserEmail) {
+        myNotes.push({ id: docSnap.id, ...data });
+      }
+    });
+
+    // Minhas notas privadas
+    myNotes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    myNotes.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "confessional-item";
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>${item.text}</div>
+          <button class="delete-conf-btn" style="background:none; border:none; cursor:pointer; font-size:0.8rem; opacity:0.7;">🗑️</button>
+        </div>
+        <small style="color:#aaa; font-size:0.7rem; margin-top:4px;">${formatDateTime(item.createdAt)}</small>
+      `;
+
+      div.querySelector(".delete-conf-btn").addEventListener("click", async () => {
+        if (confirm("Apagar este registro privado?")) {
+          await deleteDoc(doc(db, "confessionals", item.id));
+        }
+      });
+
+      confessionalList.appendChild(div);
+    });
+
+    // Linha do tempo combinada do casal ("Registro de Nossa História")
+    allNotes.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    allNotes.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "timeline-item";
+      div.innerHTML = `
+        <div class="timeline-author">${item.author}</div>
+        <div>${item.text}</div>
+        <small style="color:#aaa; font-size:0.7rem; margin-top:4px;">${formatDateTime(item.createdAt)}</small>
+      `;
+      historyTimeline.appendChild(div);
+    });
+  });
+}
+
+// 7. CHAT COM VISTO PRECISO, DELETAR E NOTIFICAÇÕES NATIVAS
 chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = chatInput.value.trim();
@@ -220,8 +358,8 @@ function loadChat() {
 
     const isFael = auth.currentUser.email.toLowerCase().includes("fael");
     const myName = isFael ? "Fael ❤️" : "Kay 💕";
+    const isChatTabActive = tabChat.classList.contains("active-tab");
 
-    // Dispara a notificação se houver novas mensagens do outro usuário
     snapshot.docChanges().forEach((change) => {
       if (change.type === "added" && !isFirstChatLoad) {
         const newMsg = change.doc.data();
@@ -242,7 +380,8 @@ function loadChat() {
       const data = docSnap.data();
       docs.push({ id: docSnap.id, ...data });
 
-      if (data.author !== myName && !data.seen) {
+      // SÓ marca como visto se a mensagem veio do OUTRO e o usuário ATUAL está com a aba do chat aberta
+      if (data.author !== myName && !data.seen && isChatTabActive) {
         updateDoc(doc(db, "chats", docSnap.id), { seen: true });
       }
     });
@@ -288,7 +427,7 @@ function loadChat() {
   });
 }
 
-// 6. CARTAS COM DATA/HORA, DELETAR CARTA E FIX DE PDFS
+// 8. CARTAS COM DATA/HORA, DELETAR CARTA E FIX DE PDFS
 letterForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const title = letterTitle.value.trim();
@@ -379,7 +518,7 @@ function loadLetters() {
   });
 }
 
-// 7. GALERIA DE FOTOS COM DELETAR FOTO
+// 9. GALERIA DE FOTOS COM DELETAR FOTO
 photoForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const isFael = auth.currentUser.email.toLowerCase().includes("fael");
@@ -433,7 +572,7 @@ function loadPhotos() {
   });
 }
 
-// 8. BOTÃO "EU TE AMO!" E NOTIFICAÇÃO EXCLUSIVA DO FAEL
+// 10. BOTÃO "EU TE AMO!", CONGELAMENTO E UNIFICAÇÃO
 btnLoveAction.addEventListener("click", async () => {
   try {
     await addDoc(collection(db, "alerts"), {
@@ -447,40 +586,45 @@ btnLoveAction.addEventListener("click", async () => {
 });
 
 function listenToLoveAlerts(isFael) {
-  if (!isFael) {
-    if (faelVictoryModal) faelVictoryModal.style.display = "none";
-    return;
-  }
-
   const q = query(collection(db, "alerts"));
 
   onSnapshot(q, (snapshot) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser || !currentUser.email.toLowerCase().includes("fael")) {
-      if (faelVictoryModal) faelVictoryModal.style.display = "none";
-      return;
+    let validKayAlert = null;
+
+    if (!snapshot.empty) {
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.from && data.from.toLowerCase().includes("kay") && !data.from.toLowerCase().includes("fael")) {
+          if (!validKayAlert || new Date(data.timestamp) > new Date(validKayAlert.timestamp)) {
+            validKayAlert = { id: docSnap.id, ...data };
+          }
+        }
+      });
     }
 
-    if (snapshot.empty) return;
+    if (validKayAlert) {
+      startLoveTimer(validKayAlert.timestamp);
 
-    let latestKayAlert = null;
+      if (navBtnHistory) navBtnHistory.style.setProperty("display", "flex", "important");
 
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      if (data.from && !data.from.toLowerCase().includes("fael")) {
-        if (!latestKayAlert || new Date(data.timestamp) > new Date(latestKayAlert.timestamp)) {
-          latestKayAlert = { id: docSnap.id, ...data };
+      if (isFael) {
+        const currentUser = auth.currentUser;
+        if (currentUser && currentUser.email.toLowerCase().includes("fael")) {
+          const lastSeenId = localStorage.getItem("fael_last_seen_alert_id");
+          if (lastSeenId !== validKayAlert.id) {
+            if (faelVictoryModal) {
+              faelVictoryModal.style.display = "flex";
+              faelVictoryModal.dataset.currentAlertId = validKayAlert.id;
+            }
+          }
         }
+      } else {
+        if (faelVictoryModal) faelVictoryModal.style.display = "none";
       }
-    });
-
-    if (latestKayAlert) {
-      const lastSeenId = localStorage.getItem("fael_last_seen_alert_id");
-
-      if (lastSeenId !== latestKayAlert.id) {
-        faelVictoryModal.style.display = "flex";
-        faelVictoryModal.dataset.currentAlertId = latestKayAlert.id;
-      }
+    } else {
+      startLoveTimer(null);
+      if (navBtnHistory) navBtnHistory.style.setProperty("display", "none", "important");
+      if (faelVictoryModal) faelVictoryModal.style.display = "none";
     }
   });
 }

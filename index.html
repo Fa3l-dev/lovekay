@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
 </head>
 <body>
 
@@ -95,10 +94,37 @@
         </div>
       </div>
 
-      <!-- ABA 3: ÁLBUM DE FOTOS -->
+      <!-- ABA 3: CRONÔMETRO DE AMOR -->
+      <div id="tab-timer" class="tab-content">
+        <div class="card timer-card">
+          <h3>Tempo que o Fael está apaixonado pela Kay ❤️</h3>
+          <div id="love-timer" class="timer-display">
+            <div class="timer-unit"><span id="timer-days">0</span><small>Dias</small></div>
+            <div class="timer-unit"><span id="timer-hours">00</span><small>Horas</small></div>
+            <div class="timer-unit"><span id="timer-minutes">00</span><small>Min</small></div>
+            <div class="timer-unit"><span id="timer-seconds">00</span><small>Seg</small></div>
+          </div>
+          <p id="timer-status-text" class="timer-status">O tempo continua contando... ⏳</p>
+        </div>
+      </div>
+
+      <!-- ABA 4: CONFESSIONÁRIO PRIVADO -->
+      <div id="tab-confessional" class="tab-content">
+        <div class="card write-card">
+          <h3>Meu Confessionário Privado 🔒</h3>
+          <p class="placeholder-text" style="margin-bottom: 12px; font-size: 0.8rem;">Somente você pode ler o que escreve aqui.</p>
+          <form id="confessional-form">
+            <textarea id="confessional-input" placeholder="Escreva seus pensamentos e sentimentos secretos..." required></textarea>
+            <button type="submit" class="btn-primary">Guardar Segredo 🔑</button>
+          </form>
+        </div>
+        <div id="confessional-list" class="letters-list" style="margin-top: 15px;"></div>
+      </div>
+
+      <!-- ABA 5: ÁLBUM DE FOTOS -->
       <div id="tab-photos" class="tab-content">
         <section class="card write-card">
-          <h3>Adicionar Fotos Nossas📷</h3>
+          <h3>Adicionar Foto do Casal 📷</h3>
           <form id="photo-form">
             <input type="text" id="photo-title" placeholder="Legenda da Foto" required />
             <input type="url" id="photo-url" placeholder="Link da Imagem (Imgur, Drive, Pinterest)" required />
@@ -114,11 +140,20 @@
         </section>
       </div>
 
-      <!-- ABA 4: EU TE AMO (EXCLUSIVO KAY) -->
+      <!-- ABA 6: REGISTRO DE NOSSA HISTÓRIA (DESBLOQUEÁVEL APENAS QUANDO ELA CLICAR) -->
+      <div id="tab-history" class="tab-content">
+        <div class="card history-card">
+          <h3>Registro de Nossa História 📖✨</h3>
+          <p class="placeholder-text" style="margin-bottom: 15px; font-size: 0.85rem;">Nossos confessionários agora estão unificados!</p>
+          <div id="history-timeline" class="letters-list"></div>
+        </div>
+      </div>
+
+      <!-- ABA 7: EU TE AMO (EXCLUSIVO KAY) -->
       <div id="tab-love" class="tab-content">
         <div class="card love-card">
           <p class="love-subtitle-top">
-             Aperte esse botão quando estiver decidida, ao apertar esse botão vc declarará que ama o fael (ele recebrá)
+            Ao apertar esse botão você confirmará que sente algo pelo Fael (ele receberá)
           </p>
           
           <button id="btn-love-action" class="btn-love-giant">
@@ -147,11 +182,24 @@
         <span class="nav-icon">💬</span>
         <span class="nav-label">Chat</span>
       </button>
+      <button id="nav-btn-timer" class="nav-item">
+        <span class="nav-icon">⏳</span>
+        <span class="nav-label">Tempo</span>
+      </button>
+      <button id="nav-btn-confessional" class="nav-item">
+        <span class="nav-icon">🔒</span>
+        <span class="nav-label">Segredos</span>
+      </button>
       <button id="nav-btn-photos" class="nav-item">
         <span class="nav-icon">📷</span>
         <span class="nav-label">Álbum</span>
       </button>
-      <button id="nav-btn-love" class="nav-item" style="display: none;">
+      <!-- BOTÃO HISTÓRIA TOTALMENTE ESCONDIDO POR PADRÃO -->
+      <button id="nav-btn-history" class="nav-item" style="display: none !important;">
+        <span class="nav-icon">📖</span>
+        <span class="nav-label">História</span>
+      </button>
+      <button id="nav-btn-love" class="nav-item" style="display: none !important;">
         <span class="nav-icon">💖</span>
         <span class="nav-label">Eu te amo!</span>
       </button>

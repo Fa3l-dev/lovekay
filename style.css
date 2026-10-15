@@ -65,12 +65,14 @@ body {
 
 form { display: flex; flex-direction: column; gap: 12px; }
 
-input {
+input, textarea {
   width: 100%; padding: 12px 15px; border: 1.5px solid #ffe4e1;
-  border-radius: 12px; outline: none; transition: 0.3s;
+  border-radius: 12px; outline: none; transition: 0.3s; font-family: inherit;
 }
 
-input:focus { border-color: #ffb6c1; }
+textarea { height: 90px; resize: none; }
+
+input:focus, textarea:focus { border-color: #ffb6c1; }
 
 .btn-primary {
   background-color: #ff8da1; color: white; border: none; padding: 12px;
@@ -162,7 +164,6 @@ input:focus { border-color: #ffb6c1; }
   word-break: break-word;
 }
 
-/* MINHAS MENSAGENS (DIREITA) */
 .chat-bubble.mine {
   align-self: flex-end;
   background: #ff8da1;
@@ -170,7 +171,6 @@ input:focus { border-color: #ffb6c1; }
   border-bottom-right-radius: 4px;
 }
 
-/* MENSAGENS DA OUTRA PESSOA (ESQUERDA) */
 .chat-bubble.other {
   align-self: flex-start;
   background: #ffffff;
@@ -185,18 +185,37 @@ input:focus { border-color: #ffb6c1; }
   margin-bottom: 3px;
 }
 
-.chat-bubble.mine .chat-author {
-  color: #fff0f5;
-  text-align: right;
-}
-
-.chat-bubble.other .chat-author {
-  color: #ff8da1;
-}
+.chat-bubble.mine .chat-author { color: #fff0f5; text-align: right; }
+.chat-bubble.other .chat-author { color: #ff8da1; }
 
 .emoji-bar { display: flex; gap: 10px; padding: 6px 4px; overflow-x: auto; margin-bottom: 5px; }
 .emoji-btn { font-size: 1.3rem; cursor: pointer; transition: transform 0.1s; }
 .emoji-btn:active { transform: scale(1.2); }
+
+/* CRONÔMETRO DE AMOR */
+.timer-card { text-align: center; padding: 25px 15px; }
+.timer-card h3 { color: #ff8da1; font-size: 1.05rem; margin-bottom: 20px; line-height: 1.4; }
+.timer-display { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+.timer-unit {
+  background: #fff0f5; border: 1px solid #ffe4e1; padding: 10px 8px;
+  border-radius: 12px; min-width: 62px; display: flex; flex-direction: column; align-items: center;
+}
+.timer-unit span { font-size: 1.3rem; font-weight: bold; color: #ff477e; }
+.timer-unit small { font-size: 0.65rem; color: #888; text-transform: uppercase; margin-top: 2px; }
+.timer-status { font-size: 0.85rem; color: #ff758f; font-weight: 500; }
+
+/* CONFESSIONÁRIO & HISTÓRIA */
+.confessional-item {
+  background: #ffffff; border-left: 4px solid #ff8da1; padding: 12px;
+  border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 182, 193, 0.15);
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.timeline-item {
+  background: #fff8f9; border: 1px solid #ffe4e1; padding: 14px;
+  border-radius: 14px; display: flex; flex-direction: column; gap: 6px;
+}
+.timeline-author { font-weight: bold; color: #ff477e; font-size: 0.85rem; }
 
 /* GALERIA DE FOTOS */
 .photos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 10px; }
@@ -229,8 +248,8 @@ input:focus { border-color: #ffb6c1; }
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 25px;
-  padding: 12px 0;
+  gap: 12px;
+  padding: 10px 0;
   box-shadow: 0 -4px 15px rgba(255, 182, 193, 0.25);
   z-index: 99;
 }
@@ -243,12 +262,12 @@ input:focus { border-color: #ffb6c1; }
   align-items: center;
   color: #aaa;
   cursor: pointer;
-  font-size: 0.75rem;
-  gap: 3px;
+  font-size: 0.7rem;
+  gap: 2px;
   transition: 0.2s;
 }
 
-.nav-item .nav-icon { font-size: 1.3rem; }
+.nav-item .nav-icon { font-size: 1.2rem; }
 .nav-item.active { color: #ff8da1; font-weight: 600; transform: scale(1.05); }
 
 /* MODAIS */
